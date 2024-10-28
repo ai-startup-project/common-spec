@@ -47,11 +47,13 @@ jobs:
         run: |
           # Extract service name and version from the latest tag
           SERVICE_NAME="user_service"
-          OUTPUT_DIR="generated/go/${SERVICE_NAME}-${{ env.NEW_VERSION }}"
+          OUTPUT_DIR="${SERVICE_NAME}-${{ env.NEW_VERSION }}"
 
           # Create output directory and generate code
           mkdir -p "$OUTPUT_DIR"
-          protoc -I=protos/ --go_out="$OUTPUT_DIR" --go-grpc_out="$OUTPUT_DIR" protos/*.proto
+          protoc -I=protos/ --go_out="$OUTPUT_DIR" --go_opt=paths=source_relative \
+          --go-grpc_out="$OUTPUT_DIR" --go-grpc_opt=paths=source_relative \
+          protos/*.proto
 
       - name: Create and push new tag
         if: success()
