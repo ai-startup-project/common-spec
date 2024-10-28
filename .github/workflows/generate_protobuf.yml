@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main  # Only trigger on pushes to the main branch
+    paths:
+      - 'protos/**'  
 
 jobs:
   build:
@@ -62,8 +64,8 @@ jobs:
           NEW_TAG: ${{ env.NEW_VERSION }}
         run: |
           # Set Git user details
-          git config user.name ${{ github.actor }}
-          git config user.email ${{ github.actor }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Create and push the new tag
           git tag $NEW_TAG
@@ -75,8 +77,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
           NEW_TAG: ${{ env.NEW_VERSION }}
         run: |
-          git config --global user.name ${{ github.actor }}
-          git config --global user.email ${{ github.actor }}
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git diff --cached --exit-code || git commit -m "Auto-generate protobuf code for $NEW_TAG"
           git push origin main
