@@ -60,8 +60,12 @@ jobs:
           MINOR=${VERSION_PARTS[1]}
           PATCH=${VERSION_PARTS[2]}
 
-          # Increment the patch version
-          PATCH=$((PATCH + 1))
+          # Ensure that PATCH is a valid number; if not, default to 0
+          if ! [[ "$PATCH" =~ ^[0-9]+$ ]]; then
+              PATCH=0
+          else
+              PATCH=$((PATCH + 1))
+          fi
 
           # Assemble the new tag
           NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
