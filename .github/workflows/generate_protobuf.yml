@@ -46,8 +46,8 @@ jobs:
       - name: Generate Go Code from Protobuf
         run: |
           # Extract service name and version from the latest tag
-          SERVICE_NAME="user_service"
-          OUTPUT_DIR="${SERVICE_NAME}-${{ env.NEW_VERSION }}"
+          SERVICE_NAME=${{ github.event.repository.name }}
+          OUTPUT_DIR="generated/protos/${SERVICE_NAME}"
 
           # Create output directory and generate code
           mkdir -p "$OUTPUT_DIR"
