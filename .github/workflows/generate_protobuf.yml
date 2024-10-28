@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main  # Only trigger on pushes to the main branch
+    paths:
+      - 'protos/**' 
 
 jobs:
   build:
@@ -29,54 +31,34 @@ jobs:
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
           export PATH="$PATH:$(go env GOPATH)/bin"
 
-      - name: Get latest tag
-        id: get_latest_tag
+      - name: Get the current version from Git tags
+        id: versioning
         run: |
           git fetch --tags
-          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` || echo "v0.0.0")
-          echo "Latest tag: $LATEST_TAG"
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_ENV
+          VERSION=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          VERSION_NUMBER=${VERSION:1}
+          MAJOR=$(echo $VERSION_NUMBER | cut -d. -f1)
+          MINOR=$(echo $VERSION_NUMBER | cut -d. -f2)
+          PATCH=$(echo $VERSION_NUMBER | cut -d. -f3)
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Generate Go Code from Protobuf
-        env:
-          LATEST_TAG: ${{ env.latest_tag }}
         run: |
           # Extract service name and version from the latest tag
           SERVICE_NAME="user_service"
-          VERSION="${LATEST_TAG%.*}"  # Extracts `v1` from `v1.0.0`
-          OUTPUT_DIR="generated/go/${SERVICE_NAME}-${VERSION}"
+          OUTPUT_DIR="generated/go/${SERVICE_NAME}-${{ env.NEW_VERSION }}"
 
           # Create output directory and generate code
           mkdir -p "$OUTPUT_DIR"
           protoc -I=protos/ --go_out="$OUTPUT_DIR" --go-grpc_out="$OUTPUT_DIR" protos/*.proto
 
-      - name: Increment tag
-        if: success()
-        id: increment_tag
-        run: |
-          # Separate the version components
-          IFS='.' read -r -a VERSION_PARTS <<< "${LATEST_TAG#v}"
-          MAJOR=${VERSION_PARTS[0]:-0}  # Default to 0 if not set
-          MINOR=${VERSION_PARTS[1]:-0}  # Default to 0 if not set
-          PATCH=${VERSION_PARTS[2]:-0}  # Default to 0 if not set
-
-          # Ensure that PATCH is a valid number; if not, default to 0
-          if ! [[ "$PATCH" =~ ^[0-9]+$ ]]; then
-              PATCH=0
-          else
-              PATCH=$((PATCH + 1))
-          fi
-
-          # Assemble the new tag
-          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
-          echo "New tag: $NEW_TAG"
-          echo "new_tag=$NEW_TAG" >> $GITHUB_ENV
-
       - name: Create and push new tag
         if: success()
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-          NEW_TAG: ${{ env.new_tag }}
+          NEW_TAG: ${{ env.NEW_VERSION }}
         run: |
           # Set Git user details
           git config user.name ${{ github.actor }}
@@ -90,7 +72,7 @@ jobs:
         if: success()
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-          NEW_TAG: ${{ env.new_tag }}
+          NEW_TAG: ${{ env.NEW_VERSION }}
         run: |
           git config --global user.name ${{ github.actor }}
           git config --global user.email ${{ github.actor }}
