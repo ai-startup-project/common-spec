@@ -1,25 +1,36 @@
 syntax = "proto3";
 
-package example;
+package payment.hub.config;
 
 option go_package = "common-spec/api/common";
 
-message User {
-  string id = 1;
-  string name = 2;
-  int32 age = 3;
+message CreateConfigRequest {
+    string partner = 1;
+    string name = 1;
+    string apiKey = 2;
+    string accessKey = 3;
+    string secretKey = 4;
+    string requestUrl = 5;
+    string callbackUrl = 6;
+}
+
+message CreateConfigResponse {
+    string status = 1;
+    int32 errorCode = 2;
+    string errorMessage = 3; 
+    Config config = 4;
+}
+
+message Config {
+    string id = 1;
+    string name = 2;
+    string apiKey = 3;
+    string accessKey = 4;
+    string secretKey = 5;
+    string requestUrl = 6;
+    string callbackUrl = 7;
 }
 
 service UserService {
-  rpc GetUser (UserRequest) returns (UserResponse);
-}
-
-message UserRequest {
-  string id = 1;
-  string name = 2;
-  string email = 3;
-}
-
-message UserResponse {
-  User user = 1;
+    rpc CreateConfig (ConfigRequest) returns (ConfigResponse);
 }
