@@ -1,0 +1,95 @@
+name: Generate Protobuf
+
+on:
+  push:
+    branches:
+      - main  # Only trigger on pushes to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Install Protocol Buffers Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+
+      - name: Install Go Protobuf Plugin
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          export PATH="$PATH:$(go env GOPATH)/bin"
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          git fetch --tags
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Generate Go Code from Protobuf
+        env:
+          LATEST_TAG: ${{ env.latest_tag }}
+        run: |
+          # Extract service name and version from the latest tag
+          SERVICE_NAME="user_service"
+          VERSION="${LATEST_TAG%.*}"  # Extracts `v1` from `v1.0.0`
+          OUTPUT_DIR="generated/go/${SERVICE_NAME}-${VERSION}"
+
+          # Create output directory and generate code
+          mkdir -p "$OUTPUT_DIR"
+          protoc -I=protos/ --go_out="$OUTPUT_DIR" --go-grpc_out="$OUTPUT_DIR" protos/*.proto
+
+      - name: Increment tag
+        if: success()
+        id: increment_tag
+        run: |
+          # Separate the version components
+          IFS='.' read -r -a VERSION_PARTS <<< "${LATEST_TAG#v}"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+
+          # Increment the patch version
+          PATCH=$((PATCH + 1))
+
+          # Assemble the new tag
+          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New tag: $NEW_TAG"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_ENV
+
+      - name: Create and push new tag
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          NEW_TAG: ${{ env.new_tag }}
+        run: |
+          # Set Git user details
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}
+
+          # Create and push the new tag
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+
+      - name: Commit and Push Generated Code
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          NEW_TAG: ${{ env.new_tag }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add "generated/go/${SERVICE_NAME}-${NEW_TAG}"
+          git diff --cached --exit-code || git commit -m "Auto-generate protobuf code for $NEW_TAG"
+          git push origin main
