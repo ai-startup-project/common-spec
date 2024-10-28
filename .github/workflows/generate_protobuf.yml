@@ -33,7 +33,7 @@ jobs:
         id: versioning
         run: |
           git fetch --tags
-          VERSION=$(git describe --tags || echo "v0.0.0")
+          VERSION=$(git tag --sort=-creatordate | head -n 1 || echo "v0.0.0")
           VERSION_NUMBER=${VERSION:1}
           MAJOR=$(echo $VERSION_NUMBER | cut -d. -f1)
           MINOR=$(echo $VERSION_NUMBER | cut -d. -f2)
