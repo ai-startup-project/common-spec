@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main  # Only trigger on pushes to the main branch
-        paths:
+    paths:
       - 'protos/**'  
 
 jobs:
