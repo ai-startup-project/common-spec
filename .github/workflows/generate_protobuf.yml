@@ -33,13 +33,14 @@ jobs:
         id: versioning
         run: |
           git fetch --tags
-          VERSION=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          VERSION=$(git describe --tags || echo "v0.0.0")
           VERSION_NUMBER=${VERSION:1}
           MAJOR=$(echo $VERSION_NUMBER | cut -d. -f1)
           MINOR=$(echo $VERSION_NUMBER | cut -d. -f2)
           PATCH=$(echo $VERSION_NUMBER | cut -d. -f3)
           PATCH=$((PATCH + 1))
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          echo $NEW_VERSION
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Generate Go Code from Protobuf
