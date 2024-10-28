@@ -32,5 +32,5 @@ message Config {
 }
 
 service UserService {
-    rpc CreateConfig (ConfigRequest) returns (CreateConfigResponse);
+    rpc CreateConfig (CreateConfigRequest) returns (CreateConfigResponse);
 }
