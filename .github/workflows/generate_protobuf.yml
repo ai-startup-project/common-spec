@@ -56,9 +56,9 @@ jobs:
         run: |
           # Separate the version components
           IFS='.' read -r -a VERSION_PARTS <<< "${LATEST_TAG#v}"
-          MAJOR=${VERSION_PARTS[0]}
-          MINOR=${VERSION_PARTS[1]}
-          PATCH=${VERSION_PARTS[2]}
+          MAJOR=${VERSION_PARTS[0]:-0}  # Default to 0 if not set
+          MINOR=${VERSION_PARTS[1]:-0}  # Default to 0 if not set
+          PATCH=${VERSION_PARTS[2]:-0}  # Default to 0 if not set
 
           # Ensure that PATCH is a valid number; if not, default to 0
           if ! [[ "$PATCH" =~ ^[0-9]+$ ]]; then
