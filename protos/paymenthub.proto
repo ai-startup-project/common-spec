@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package payment.hub.config;
 
-option go_package = "paymenthubpb";
+option go_package = "common-spec/api/paymenthub";
 
 // Message representing the PaymentHubConfig
 message PaymentHubConfig {
