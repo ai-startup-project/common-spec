@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package payment.hub.config;
+
+option go_package = "paymenthubpb";
+
+// Message representing the PaymentHubConfig
+message PaymentHubConfig {
+    string id = 1;                     // Unique identifier for the config
+    string name = 2;                   // Name of the payment hub
+    PaymentHubType type = 3;           // Type of payment hub (e.g., gateway, processor)
+    string credentials = 4;            // JSON-encoded credentials
+    Status status = 5;                 // Status of the config (e.g., active, inactive)
+    map<string, string> metadata = 6;  // Additional metadata for custom configurations
+    string created_at = 7;             // Timestamp for when config was created
+    string updated_at = 8;             // Timestamp for last update
+}
+
+// Enum for different types of payment hubs
+enum PaymentHubType {
+    UNKNOWN = 0;
+    GATEWAY = 1;
+    PROCESSOR = 2;
+    AGGREGATOR = 3;
+}
+
+// Enum for status
+enum Status {
+    STATUS_UNSPECIFIED = 0;
+    ACTIVE = 1;
+    INACTIVE = 2;
+    DEPRECATED = 3;
+}
+
+// Request message for SavePaymentHubConfig
+message SavePaymentHubConfigRequest {
+    PaymentHubConfig config = 1;
+}
+
+// Response message for SavePaymentHubConfig
+message SavePaymentHubConfigResponse {
+    bool status = 1;
+    string errorCode = 2;
+    string errorMessage = 3;
+    string id = 4; 
+}
+
+// Request message for GetPaymentHubConfig
+message GetPaymentHubConfigRequest {
+    string id = 1;
+}
+
+// Response message for GetPaymentHubConfig
+message GetPaymentHubConfigResponse {
+    bool status = 1;
+    string errorCode = 2;
+    string errorMessage = 3;
+    PaymentHubConfig config = 1;
+}
+
+// Request message for GetAllPaymentHubConfigs
+message GetAllPaymentHubConfigsRequest {}
+
+// Response message for GetAllPaymentHubConfigs
+message GetAllPaymentHubConfigsResponse {
+    bool status = 1;
+    string errorCode = 2;
+    string errorMessage = 3;
+    repeated PaymentHubConfig configs = 1;
+}
+
+// Request message for DeletePaymentHubConfig
+message DeletePaymentHubConfigRequest {
+    string id = 1;  // ID of the config to delete
+}
+
+// Response message for DeletePaymentHubConfig
+message DeletePaymentHubConfigResponse {
+    bool status = 1;
+    string errorCode = 2;
+    string errorMessage = 3;
+}
+
+// Service for managing PaymentHubConfig
+service PaymentHubService {
+    // Save a new or update an existing PaymentHubConfig
+    rpc SavePaymentHubConfig (SavePaymentHubConfigRequest) returns (Response);
+
+    // Get a specific PaymentHubConfig by ID
+    rpc GetPaymentHubConfig (GetPaymentHubConfigRequest) returns (Response);
+
+    // Get all PaymentHubConfig records
+    rpc GetAllPaymentHubConfigs (GetAllPaymentHubConfigsRequest) returns (Response);
+
+    // Delete a specific PaymentHubConfig by ID
+    rpc DeletePaymentHubConfig (DeletePaymentHubConfigRequest) returns (Response);
+}
