@@ -84,14 +84,14 @@ message DeletePaymentHubConfigResponse {
 // Service for managing PaymentHubConfig
 service PaymentHubService {
     // Save a new or update an existing PaymentHubConfig
-    rpc SavePaymentHubConfig (SavePaymentHubConfigRequest) returns (Response);
+    rpc SavePaymentHubConfig (SavePaymentHubConfigRequest) returns (SavePaymentHubConfigResponse);
 
     // Get a specific PaymentHubConfig by ID
-    rpc GetPaymentHubConfig (GetPaymentHubConfigRequest) returns (Response);
+    rpc GetPaymentHubConfig (GetPaymentHubConfigRequest) returns (GetPaymentHubConfigResponse);
 
     // Get all PaymentHubConfig records
-    rpc GetAllPaymentHubConfigs (GetAllPaymentHubConfigsRequest) returns (Response);
+    rpc GetAllPaymentHubConfigs (GetAllPaymentHubConfigsRequest) returns (GetAllPaymentHubConfigsResponse);
 
     // Delete a specific PaymentHubConfig by ID
-    rpc DeletePaymentHubConfig (DeletePaymentHubConfigRequest) returns (Response);
+    rpc DeletePaymentHubConfig (DeletePaymentHubConfigRequest) returns (DeletePaymentHubConfigResponse);
 }
