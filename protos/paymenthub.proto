@@ -55,7 +55,7 @@ message GetPaymentHubConfigResponse {
     bool status = 1;
     string errorCode = 2;
     string errorMessage = 3;
-    PaymentHubConfig config = 1;
+    PaymentHubConfig config = 4;
 }
 
 // Request message for GetAllPaymentHubConfigs
@@ -66,7 +66,7 @@ message GetAllPaymentHubConfigsResponse {
     bool status = 1;
     string errorCode = 2;
     string errorMessage = 3;
-    repeated PaymentHubConfig configs = 1;
+    repeated PaymentHubConfig configs = 4;
 }
 
 // Request message for DeletePaymentHubConfig
