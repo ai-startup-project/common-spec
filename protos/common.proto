@@ -1,6 +1,0 @@
-syntax = "proto3";
-
-package payment.hub.config;
-
-option go_package = "common-spec/api/common";
-
