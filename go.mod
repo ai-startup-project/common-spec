@@ -1,4 +1,4 @@
-module common-spec
+module github.com/ai-startup-project/common-spec
 
 go 1.23.1
 
